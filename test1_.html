@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Classification</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    #output {
+      margin-top: 20px;
+    }
+    img {
+      max-width: 300px;
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Classification</h1>
+  <p>Upload an image to see the prediction:</p>
+  <input type="file" id="imageUpload" accept="image/*">
+  <div id="output">
+    <img id="uploadedImage" src="#" alt="Uploaded Image" style="display: none;">
+    <p id="prediction" style="font-weight: bold;"></p>
+  </div>
+
+  <script>
+    const modelPath = './model.json'; // Adjust path if necessary
+    let model;
+
+    async function loadModel() {
+      console.log("Loading model...");
+      model = await tf.loadGraphModel(modelPath);
+      console.log("Model loaded.");
+    }
+
+    async function predictImage(imageElement) {
+      const tensor = tf.browser.fromPixels(imageElement)
+        .resizeNearestNeighbor([224, 224]) // Resize to model's input size
+        .toFloat()
+        .expandDims(0);
+
+      const prediction = model.predict(tensor);
+      const classIndex = (await prediction.array())[0].indexOf(Math.max(...(await prediction.array())[0]));
+
+      return classIndex; // Change this to actual class mapping if available
+    }
+
+    document.getElementById("imageUpload").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const img = document.getElementById("uploadedImage");
+        img.src = URL.createObjectURL(file);
+        img.onload = async () => {
+          img.style.display = "block";
+          const classIndex = await predictImage(img);
+          document.getElementById("prediction").textContent = `Predicted Class: ${classIndex}`;
+        };
+      }
+    });
+
+    loadModel();
+  </script>
+</body>
+</html>

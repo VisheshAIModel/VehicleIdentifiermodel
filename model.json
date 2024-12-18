@@ -5,7 +5,8 @@
   "weightsManifest": [
     {
       "paths": [
-        "weights.bin"
+        "https://raw.githubusercontent.com/VisheshAIModel/VehicleIdentifiermodel/main/weights.bin
+"
       ]
     }
   ]
